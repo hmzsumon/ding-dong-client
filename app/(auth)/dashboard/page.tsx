@@ -1,11 +1,14 @@
+import Carousel from '@/components/dashboard/Carousel';
+import GlobalMenu from '@/components/dashboard/GlobalMenu';
+import UsersGrid from '@/components/dashboard/UsersGrid';
 import React from 'react';
 
 const Dashboard = () => {
 	return (
 		<div>
-			<h2>
-				<span className='text-3xl font-bold'>Dashboard</span>
-			</h2>
+			<Carousel />
+			<GlobalMenu />
+			<UsersGrid />
 		</div>
 	);
 };
