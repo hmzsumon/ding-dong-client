@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { Camera, Smile, Wifi } from 'lucide-react';
-
+import toast from 'react-hot-toast';
 const resolutions = {
 	'360p': { width: 640, height: 360 },
 	'480p': { width: 854, height: 480 },
@@ -63,6 +63,10 @@ export default function GoLive() {
 
 	const toggleBeauty = () => {
 		setBeautyOn((prev) => !prev);
+	};
+
+	const handleLiveStart = () => {
+		toast.error('Agora is not ready yet. Please check back later.');
 	};
 
 	return (
@@ -132,7 +136,10 @@ export default function GoLive() {
 
 			{/* Go Live Button */}
 			<div className='absolute bottom-16 left-0 right-0 flex justify-center z-10'>
-				<button className='bg-gradient-to-r from-pink-500 to-purple-600 px-10 py-3 rounded-full text-lg font-bold shadow-lg'>
+				<button
+					className='bg-gradient-to-r from-pink-500 to-purple-600 px-10 py-3 rounded-full text-lg font-bold shadow-lg'
+					onClick={() => handleLiveStart()}
+				>
 					Go Live
 				</button>
 			</div>

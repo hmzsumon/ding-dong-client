@@ -1,13 +1,10 @@
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import './globals.css';
-import { clsx } from 'clsx';
-import { ClerkProvider } from '@clerk/nextjs';
-import NavBar from '@/components/layout/NavBar';
 import Container from '@/components/layout/Container';
 import SocketProvider from '@/providers/SocketProvider';
 import { AuthProvider } from '@/context/AuthContext';
-
+import { Toaster } from 'react-hot-toast';
 const geistSans = localFont({
 	src: './fonts/GeistVF.woff',
 	variable: '--font-geist-sans',
@@ -40,6 +37,7 @@ export default function RootLayout({
 						<main className='flex flex-col min-h-screen'>
 							<Container>{children}</Container>
 						</main>
+						<Toaster />
 					</AuthProvider>
 				</SocketProvider>
 			</body>
