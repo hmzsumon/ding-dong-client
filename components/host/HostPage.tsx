@@ -10,60 +10,68 @@ const TOKEN =
 
 export default function HostPage() {
 	const videoRef = useRef<HTMLDivElement>(null);
+	const [joined, setJoined] = useState(false);
 	const [trackCreated, setTrackCreated] = useState(false);
+	const [localTrack, setLocalTrack] = useState<any>(null);
 
+	// Permission alert (mobile only)
 	useEffect(() => {
-		let localTrack: any;
+		navigator.mediaDevices
+			.getUserMedia({ video: true, audio: true })
+			.catch(() => alert('📷🎤 Please allow camera and microphone access.'));
+	}, []);
 
-		const start = async () => {
-			try {
-				if (agoraClient.connectionState !== 'DISCONNECTED') return;
+	const startStream = async () => {
+		try {
+			if (agoraClient.connectionState !== 'DISCONNECTED') return;
 
-				console.log('[JOIN] Attempting to join...');
-				await agoraClient.setClientRole('host');
-				const uid = await agoraClient.join(
-					APP_ID,
-					CHANNEL,
-					TOKEN || null,
-					null
-				);
-				console.log('[JOINED] UID:', uid);
+			await agoraClient.setClientRole('host');
+			const uid = await agoraClient.join(APP_ID, CHANNEL, TOKEN || null, null);
+			console.log('[JOINED] UID:', uid);
 
-				localTrack = await AgoraRTC.createCameraVideoTrack();
-				await agoraClient.publish([localTrack]);
-				console.log('📡 Track published');
+			const track = await AgoraRTC.createCameraVideoTrack();
+			await agoraClient.publish([track]);
+			setLocalTrack(track);
 
-				if (videoRef.current) {
-					await localTrack.play(videoRef.current);
-					console.log('📺 Video playing');
-					setTrackCreated(true); // ✅ Set state after successful play
-				}
-			} catch (err) {
-				console.error('[ERROR] Join failed:', err);
+			if (videoRef.current) {
+				track.play(videoRef.current);
+				setTrackCreated(true);
 			}
-		};
+			setJoined(true);
+		} catch (err) {
+			console.error('[ERROR] Join failed:', err);
+		}
+	};
 
-		start();
-
+	// Cleanup on leave
+	useEffect(() => {
 		return () => {
 			if (localTrack) {
 				localTrack.stop();
 				localTrack.close();
 			}
-			agoraClient.leave().then(() => {
-				console.log('[LEAVE] Left channel');
-			});
+			agoraClient.leave().then(() => console.log('[LEAVE] Left channel'));
 		};
-	}, []);
+	}, [localTrack]);
 
 	return (
 		<div className='p-4'>
 			<h1 className='text-lg font-bold mb-4'>🎥 Host Live Stream</h1>
+
+			{!joined && (
+				<button
+					onClick={startStream}
+					className='px-6 py-3 rounded-md bg-green-600 text-white font-medium mb-4'
+				>
+					▶️ Start Streaming
+				</button>
+			)}
+
 			<div
 				ref={videoRef}
 				className='w-full h-[400px] bg-black rounded-md overflow-hidden flex items-center justify-center'
 			>
-				{!trackCreated && <span className='text-white'>🔄 Connecting...</span>}
+				{!trackCreated && <span className='text-white'>🔄 Waiting...</span>}
 			</div>
 		</div>
 	);
